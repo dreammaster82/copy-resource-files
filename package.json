@@ -1,0 +1,15 @@
+{
+  "name": "copy-resource-files",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Denis Mihaylyukov",
+  "license": "ISC",
+  "dependencies": {
+    "glob": "^7.1.2",
+    "html-minifier": "^3.5.9"
+  }
+}
