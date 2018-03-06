@@ -64,11 +64,11 @@ CopyResorceFiles.prototype.apply = function(compiler) {
                             context.some(entry => {
                                 try {
                                     let need;
-                                    let baseName = path.basename(str);
+                                    let baseName = path.basename(str), normalSrt = path.normalize(str).replace(/\\/g, '/');;
                                     if (baseName in findFiles) {
                                         if (Array.isArray(findFiles[baseName])) {
-                                            need = findFiles[baseName].find(it => it.endsWith(str));
-                                        } else need = findFiles[baseName].endsWith(str) ? findFiles[baseName] : false;
+                                            need = findFiles[baseName].find(it => it.endsWith(normalSrt));
+                                        } else need = findFiles[baseName].endsWith(normalSrt) ? findFiles[baseName] : false;
                                     }
                                     if (need) {
                                         let resolve = path.resolve(entry, '../' + need)
