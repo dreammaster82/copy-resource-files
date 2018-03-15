@@ -34,7 +34,7 @@ function CopyResorceFiles(options) {
 };
 
 CopyResorceFiles.prototype.apply = function(compiler) {
-    let src = this.options.src, isMin = this.options.min, name = this.options.name || null, recurse = this.options.recurse, prefix = this.options.prefix || '';
+    let src = this.options.src, isMin = this.options.min, name = this.options.name || null, recurse = this.options.recurse, prefix = this.options.prefix || null;
     if (src) {
         compiler.plugin('compilation', (compilation) => {
             compilation.plugin('additional-assets', (callback) => {
@@ -98,7 +98,8 @@ CopyResorceFiles.prototype.apply = function(compiler) {
                                 if (isMin) fileContext = minify(fileContext);
                                 compilation.assets[newFileName] = new webpackSources.RawSource(fileContext);
                                 hasReplace = true;
-                                return prefix + newFileName;
+                                if (prefix && str.startsWith(prefix)) newFileName = prefix + newFileName;
+                                return newFileName;
                             } else return str;
                         });
 
