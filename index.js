@@ -56,6 +56,8 @@ CopyResorceFiles.prototype.apply = function(compiler) {
                         return prev;
                     }, {});
 
+                    let context = this.options.context ? [path.resolve(this.options.context)] : compilation.entries.map(entry => entry.context);
+
                     /**
                      * Заменяет ресурсы
                      * @param source
@@ -111,7 +113,6 @@ CopyResorceFiles.prototype.apply = function(compiler) {
                         return hasReplace ? newSource : null;
                     }
 
-                    let context = compilation.entries.map(entry => entry.context);
                     if (context.length) {
                         compilation.chunks.forEach(chunk => {
                             chunk.files.forEach(file => {
