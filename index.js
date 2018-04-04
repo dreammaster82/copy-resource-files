@@ -38,6 +38,11 @@ CopyResorceFiles.prototype.apply = function(compiler) {
     if (src) {
         compiler.plugin('compilation', (compilation) => {
             compilation.plugin('additional-assets', (callback) => {
+                if (this.options.minChunks && compilation.chunks.length < this.options.minChunks) {
+                    callback();
+                    return;
+                }
+                
                 glob(src, {root: this.options.root || compiler.context, ignore: this.options.ignore || null}, (err, files) => {
                     let srcReg = new RegExp(parseGlob(src), 'ig');
                     let findFiles = files.reduce((prev, file) => {
