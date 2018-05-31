@@ -4,20 +4,10 @@ const loaderUtils = require('loader-utils'),
     minifier = require('html-minifier').minify,
     webpackSources = require('webpack-sources');
 
-function minify(content) {
+function minify(content, options) {
     content = content instanceof Buffer ? content.toString('utf8') : content;
     try {
-        return minifier(content, {
-            collapseBooleanAttributes: true,
-            collapseWhitespace: true,
-            decodeEntities: true,
-            minifyCSS: true,
-            minifyJS: true,
-            removeAttributeQuotes: true,
-            removeComments: true,
-            removeScriptTypeAttributes: true,
-            removeStyleLinkTypeAttributes: true
-        });
+        return minifier(content, options);
     } catch (e) {
         console.warn(path);
         return content;
@@ -34,7 +24,18 @@ function CopyResorceFiles(options) {
 };
 
 CopyResorceFiles.prototype.apply = function(compiler) {
-    let src = this.options.src, isMin = this.options.min, name = this.options.name || null, recurse = this.options.recurse, prefix = this.options.prefix || null;
+    let src = this.options.src, isMin = this.options.min, name = this.options.name || null, recurse = this.options.recurse, prefix = this.options.prefix || null,
+		minifierOptions = Object.assign({
+            collapseBooleanAttributes: true,
+            collapseWhitespace: true,
+            decodeEntities: true,
+            minifyCSS: true,
+            minifyJS: true,
+            removeAttributeQuotes: true,
+            removeComments: true,
+            removeScriptTypeAttributes: true,
+            removeStyleLinkTypeAttributes: true
+        }, this.options.minifier);
     if (src) {
         compiler.plugin('compilation', (compilation) => {
             compilation.plugin('additional-assets', (callback) => {
