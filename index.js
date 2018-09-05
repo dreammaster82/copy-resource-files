@@ -9,7 +9,7 @@ function minify(content, options) {
     try {
         return minifier(content, options);
     } catch (e) {
-        console.warn(path);
+        console.warn(e);
         return content;
     }
 };
@@ -25,7 +25,8 @@ function CopyResorceFiles(options) {
 
 CopyResorceFiles.prototype.apply = function(compiler) {
     let src = this.options.src, isMin = this.options.min, name = this.options.name || null, recurse = this.options.recurse, prefix = this.options.prefix || null,
-		minifierOptions = Object.assign({
+        replaceBeforeName = this.options.replaceBeforeName || false,
+        minifierOptions = Object.assign({
             collapseBooleanAttributes: true,
             collapseWhitespace: true,
             decodeEntities: true,
@@ -36,6 +37,26 @@ CopyResorceFiles.prototype.apply = function(compiler) {
             removeScriptTypeAttributes: true,
             removeStyleLinkTypeAttributes: true
         }, this.options.minifier);
+
+    function generateName(name, filePath, fileContext) {
+        let newFileName = name;
+        if (newFileName) {
+            if (newFileName.search('[name]')) {
+                let currentName = path.basename(filePath), extFile = path.extname(currentName);
+                newFileName = newFileName.replace('[name]', currentName.replace(extFile, ''));
+            }
+            if (newFileName.search('[hash]')) {
+                newFileName = newFileName.replace('[hash]', loaderUtils.getHashDigest(fileContext));
+            }
+            if (newFileName.search('[timestamp]')) {
+                newFileName = newFileName.replace('[timestamp]', Date.now());
+            }
+        } else {
+            newFileName = path.basename(filePath);
+        }
+        return newFileName;
+    }
+
     if (src) {
         compiler.plugin('compilation', (compilation) => {
             compilation.plugin('additional-assets', (callback) => {
@@ -43,7 +64,7 @@ CopyResorceFiles.prototype.apply = function(compiler) {
                     callback();
                     return;
                 }
-                
+
                 glob(src, {root: this.options.root || compiler.context, ignore: this.options.ignore || null}, (err, files) => {
                     let srcReg = new RegExp(parseGlob(src), 'ig');
                     let findFiles = files.reduce((prev, file) => {
@@ -93,15 +114,9 @@ CopyResorceFiles.prototype.apply = function(compiler) {
                             });
                             if (filePath) {
                                 let fileContext = compiler.inputFileSystem.readFileSync(filePath);
-                                let newFileName;
-                                if (name) {
-                                    if (name.search('[hash]')) {
-                                        newFileName = name.replace('[hash]', loaderUtils.getHashDigest(fileContext));
-                                    }
-                                } else {
-                                    newFileName = path.basename(filePath);
-                                }
+
                                 let replacedContext = recurse ? replaceSource(fileContext) : null;
+                                let newFileName = generateName(name, filePath, replaceBeforeName && replacedContext ? replacedContext : fileContext);
                                 if (replacedContext) fileContext = replacedContext;
                                 if (isMin) fileContext = minify(fileContext);
                                 compilation.assets[newFileName] = new webpackSources.RawSource(fileContext);
